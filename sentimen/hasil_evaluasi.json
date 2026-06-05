@@ -1,0 +1,239 @@
+{
+  "akurasi": "87.09%",
+  "f1_score_weighted": "87.44%",
+  "classification_report": {
+    "Negatif": {
+      "precision": 0.8943475705329154,
+      "recall": 0.9146420878625457,
+      "f1-score": 0.904380990118626,
+      "support": 19963.0
+    },
+    "Netral": {
+      "precision": 0.08934707903780069,
+      "recall": 0.24413145539906103,
+      "f1-score": 0.13081761006289308,
+      "support": 213.0
+    },
+    "Positif": {
+      "precision": 0.8688740630920023,
+      "recall": 0.8137776749209288,
+      "f1-score": 0.8404238368387508,
+      "support": 12963.0
+    },
+    "accuracy": 0.8708772141585444,
+    "macro avg": {
+      "precision": 0.6175229042209062,
+      "recall": 0.6575170727275119,
+      "f1-score": 0.6252074790067567,
+      "support": 33139.0
+    },
+    "weighted avg": {
+      "precision": 0.8792089670251144,
+      "recall": 0.8708772141585444,
+      "f1-score": 0.8743907798552235,
+      "support": 33139.0
+    }
+  },
+  "best_params": {
+    "max_depth": null,
+    "min_samples_leaf": 1,
+    "min_samples_split": 5,
+    "n_estimators": 100
+  },
+  "confusion_matrix": [
+    [18259, 185, 1519],
+    [88, 52, 73],
+    [2069, 345, 10549]
+  ],
+  "confusion_matrix_labels": ["Negatif", "Netral", "Positif"],
+  "tren_labels": ["2020", "2021", "2022", "2023", "2024", "2025"],
+  "tren_positif": [6987, 5947, 14314, 14558, 17782, 5226],
+  "tren_negatif": [19472, 18226, 17953, 13699, 22830, 7637],
+  "tren_netral": [224, 167, 212, 155, 236, 69],
+  "wordcloud_positif": [
+    {
+      "text": "mudah",
+      "value": 16071
+    },
+    {
+      "text": "bantu",
+      "value": 14788
+    },
+    {
+      "text": "aplikasi",
+      "value": 14055
+    },
+    {
+      "text": "bagus",
+      "value": 8371
+    },
+    {
+      "text": "jkn",
+      "value": 7376
+    },
+    {
+      "text": "sehat",
+      "value": 6905
+    },
+    {
+      "text": "bpjs",
+      "value": 6537
+    },
+    {
+      "text": "kasih",
+      "value": 6421
+    },
+    {
+      "text": "layan",
+      "value": 6376
+    },
+    {
+      "text": "terima",
+      "value": 5951
+    },
+    {
+      "text": "nya",
+      "value": 5003
+    },
+    {
+      "text": "mobile",
+      "value": 3954
+    },
+    {
+      "text": "daftar",
+      "value": 3780
+    },
+    {
+      "text": "cepat",
+      "value": 3605
+    },
+    {
+      "text": "mantap",
+      "value": 3549
+    }
+  ],
+  "wordcloud_negatif": [
+    {
+      "text": "aplikasi",
+      "value": 53935
+    },
+    {
+      "text": "masuk",
+      "value": 34262
+    },
+    {
+      "text": "daftar",
+      "value": 32280
+    },
+    {
+      "text": "baru",
+      "value": 23609
+    },
+    {
+      "text": "sulit",
+      "value": 20014
+    },
+    {
+      "text": "nya",
+      "value": 19369
+    },
+    {
+      "text": "nomor",
+      "value": 16625
+    },
+    {
+      "text": "verifikasi",
+      "value": 14445
+    },
+    {
+      "text": "kode",
+      "value": 10546
+    },
+    {
+      "text": "buka",
+      "value": 10254
+    },
+    {
+      "text": "tolong",
+      "value": 10210
+    },
+    {
+      "text": "udah",
+      "value": 10084
+    },
+    {
+      "text": "bpjs",
+      "value": 10034
+    },
+    {
+      "text": "pakai",
+      "value": 9792
+    },
+    {
+      "text": "banget",
+      "value": 8581
+    }
+  ],
+  "wordcloud_netral": [
+    {
+      "text": "aplikasi",
+      "value": 596
+    },
+    {
+      "text": "mudah",
+      "value": 438
+    },
+    {
+      "text": "kasih",
+      "value": 364
+    },
+    {
+      "text": "daftar",
+      "value": 359
+    },
+    {
+      "text": "terima",
+      "value": 328
+    },
+    {
+      "text": "masuk",
+      "value": 290
+    },
+    {
+      "text": "nya",
+      "value": 271
+    },
+    {
+      "text": "tolong",
+      "value": 261
+    },
+    {
+      "text": "baru",
+      "value": 239
+    },
+    {
+      "text": "bantu",
+      "value": 204
+    },
+    {
+      "text": "jkn",
+      "value": 202
+    },
+    {
+      "text": "bpjs",
+      "value": 199
+    },
+    {
+      "text": "mohon",
+      "value": 199
+    },
+    {
+      "text": "sulit",
+      "value": 191
+    },
+    {
+      "text": "baik",
+      "value": 189
+    }
+  ]
+}

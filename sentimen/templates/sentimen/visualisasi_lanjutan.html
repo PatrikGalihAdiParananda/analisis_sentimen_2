@@ -1,0 +1,141 @@
+{% extends 'sentimen/base.html' %} {% load static %} {% block title %}Visualisasi Lanjutan{% endblock %} {% block extra_css %}
+<!-- Link untuk ikon Font Awesome (tidak diubah) -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+  xintegrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+/>
+{% endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 fade-in-up">
+  <h1 class="h2 fw-bold mb-0">Visualisasi Lanjutan</h1>
+  <div class="d-flex align-items-center text-secondary">
+    <i class="fas fa-calendar-alt me-2"></i>
+    <span class="fw-medium">Data Tren</span>
+  </div>
+</div>
+
+<!-- Cek jika ada data tren sebelum merender elemen chart -->
+{% if data_aman_untuk_visualisasi %}
+<div class="row">
+  <div class="col-12 mb-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title fw-bold">Tren Sentimen Temporal</h5>
+        <!-- Grafik Tren masih menggunakan Chart.js karena sudah berfungsi -->
+        <div style="height: 350px">
+          <canvas id="chartTrenSentimen"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-body text-center d-flex flex-column">
+        <h5 class="card-title fw-bold d-flex align-items-center justify-content-center"><i class="fas fa-smile-beam fa-lg me-2 text-success"></i> Kata Kunci Positif</h5>
+        <!-- PERUBAHAN: Menggunakan <div> bukan <canvas> untuk AnyChart -->
+        <div id="wordCloudPositif" class="flex-grow-1" style="min-height: 300px"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-body text-center d-flex flex-column">
+        <h5 class="card-title fw-bold d-flex align-items-center justify-content-center"><i class="fas fa-angry fa-lg me-2 text-danger"></i> Kata Kunci Negatif</h5>
+        <div id="wordCloudNegatif" class="flex-grow-1" style="min-height: 300px"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-body text-center d-flex flex-column">
+        <h5 class="card-title fw-bold d-flex align-items-center justify-content-center"><i class="fas fa-meh fa-lg me-2 text-warning"></i> Kata Kunci Netral</h5>
+        <div id="wordCloudNetral" class="flex-grow-1" style="min-height: 300px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-danger mt-4">
+  <h4 class="alert-heading">Data Visualisasi Tidak Ditemukan!</h4>
+  <p>Pastikan file <code>hasil_evaluasi.json</code> sudah ada di folder aplikasi dan server telah di-restart.</p>
+</div>
+{% endif %} {% endblock %} {% block extra_js %}
+<!-- ============================================================================== -->
+<!-- SCRIPT UNTUK GRAFIK (MENGGUNAKAN DUA LIBRARY BERBEDA) -->
+<!-- ============================================================================== -->
+
+<!-- 1. Library untuk Grafik Tren (Chart.js) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+<!-- 2. Library untuk Word Cloud (AnyChart) -->
+<script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-core.min.js"></script>
+<script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-tag-cloud.min.js"></script>
+
+<script>
+  // Hanya jalankan JavaScript jika data untuk visualisasi memang ada
+  {% if data_aman_untuk_visualisasi %}
+
+    // Mengambil data dari Django context.
+    const trenLabels = {{ tren_labels|safe|default:'[]' }};
+    const trenPositif = {{ tren_positif|safe|default:'[]' }};
+    const trenNegatif = {{ tren_negatif|safe|default:'[]' }};
+    const trenNetral = {{ tren_netral|safe|default:'[]' }};
+    const wordCloudPositifData = {{ wordcloud_positif|safe|default:'[]' }};
+    const wordCloudNegatifData = {{ wordcloud_negatif|safe|default:'[]' }};
+    const wordCloudNetralData = {{ wordcloud_netral|safe|default:'[]' }};
+
+    // Jalankan skrip setelah semua elemen halaman dimuat
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // --- Logika untuk Grafik Tren (menggunakan Chart.js) ---
+        const ctxLine = document.getElementById('chartTrenSentimen');
+        if (ctxLine && trenLabels.length > 0 && typeof Chart !== 'undefined') {
+            new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: trenLabels,
+                    datasets: [
+                        { label: 'Positif', data: trenPositif, borderColor: '#198754', backgroundColor: 'rgba(25, 135, 84, 0.1)', fill: true, tension: 0.4 },
+                        { label: 'Negatif', data: trenNegatif, borderColor: '#dc3545', backgroundColor: 'rgba(220, 53, 69, 0.1)', fill: true, tension: 0.4 },
+                        { label: 'Netral', data: trenNetral, borderColor: '#ffc107', backgroundColor: 'rgba(255, 193, 7, 0.1)', fill: true, tension: 0.4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index' } }
+            });
+        }
+
+        // --- Logika untuk Word Cloud (menggunakan AnyChart) ---
+        function createAnyChartWordCloud(containerId, chartData, color) {
+            if (chartData && chartData.length > 0 && typeof anychart !== 'undefined') {
+                // Ubah format data dari {text: ..., value: ...} menjadi {x: ..., value: ...}
+                const dataForChart = chartData.map(d => ({ x: d.text, value: d.value }));
+
+                // Buat grafik
+                const chart = anychart.tagCloud(dataForChart);
+                chart.angles([0]); // Hanya gunakan sudut horizontal
+                chart.container(containerId);
+                chart.draw();
+            } else {
+                const container = document.getElementById(containerId);
+                if(container) {
+                    container.innerHTML = '<p class="text-muted" style="text-align:center; padding-top: 50px;">Tidak ada data kata kunci.</p>';
+                }
+            }
+        }
+
+        // Pastikan library AnyChart sudah siap sebelum menggambar
+        anychart.onDocumentReady(function() {
+            createAnyChartWordCloud('wordCloudPositif', wordCloudPositifData);
+            createAnyChartWordCloud('wordCloudNegatif', wordCloudNegatifData);
+            createAnyChartWordCloud('wordCloudNetral', wordCloudNetralData);
+        });
+    });
+
+  {% endif %}
+</script>
+{% endblock %}

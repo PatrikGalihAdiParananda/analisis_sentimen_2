@@ -1,0 +1,117 @@
+{% extends 'sentimen/base.html' %} {% load static %} {% block title %}Tentang Proyek{% endblock %} {% block content %}
+<style>
+  .about-card {
+    line-height: 1.8;
+  }
+  .about-card h4 {
+    color: var(--accent-primary);
+    font-weight: 700;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+  .flowchart {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .flow-icon {
+    width: 60px;
+    height: 60px;
+    background-color: #eef2ff;
+    color: var(--accent-primary);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .flow-arrow {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+  }
+  @media (max-width: 768px) {
+    .flow-arrow {
+      transform: rotate(90deg);
+    }
+  }
+  .tech-logos img {
+    height: 40px;
+    margin: 10px;
+    filter: grayscale(100%);
+    opacity: 0.6;
+    transition: filter 0.3s, opacity 0.3s;
+  }
+  .tech-logos img:hover {
+    filter: grayscale(0%);
+    opacity: 1;
+  }
+</style>
+
+<div class="container-fluid">
+  <div class="card about-card">
+    <div class="card-body p-4 p-md-5">
+      <h2 class="card-title text-center mb-4">Implementasi Algoritma Random Forest untuk Klasifikasi Sentimen Ulasan Pengguna Aplikasi Layanan Kesehatan</h2>
+      <p class="text-center text-secondary mb-5">Sebuah Proyek Skripsi untuk Program Studi S-1 Informatika</p>
+
+      <h4><i class="fas fa-bullseye me-2"></i>Tujuan Penelitian</h4>
+      <p>
+        Tujuan dari penelitian ini adalah membangun dan mengevaluasi sistem klasifikasi sentimen berbasis algoritma Random Forest terhadap ulasan pengguna aplikasi layanan kesehatan, dengan menjadikan ulasan dari aplikasi Mobile JKN sebagai
+        studi kasus, serta menyajikan hasilnya melalui antarmuka website guna memperoleh pemahaman komprehensif mengenai opini publik.
+      </p>
+
+      <h4><i class="fas fa-sitemap me-2"></i>Alur Metodologi</h4>
+      <div class="flowchart">
+        <div class="flow-step">
+          <div class="flow-icon"><i class="fas fa-database"></i></div>
+          <strong>Pengumpulan Data</strong>
+        </div>
+        <div class="flow-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+        <div class="flow-step">
+          <div class="flow-icon"><i class="fas fa-broom"></i></div>
+          <strong>Preprocessing Teks</strong>
+        </div>
+        <div class="flow-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+        <div class="flow-step">
+          <div class="flow-icon"><i class="fas fa-cogs"></i></div>
+          <strong>Pelatihan Model</strong>
+        </div>
+        <div class="flow-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+        <div class="flow-step">
+          <div class="flow-icon"><i class="fas fa-check-double"></i></div>
+          <strong>Evaluasi & Validasi</strong>
+        </div>
+        <div class="flow-arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+        <div class="flow-step">
+          <div class="flow-icon"><i class="fas fa-desktop"></i></div>
+          <strong>Implementasi Web</strong>
+        </div>
+      </div>
+
+      <h4><i class="fas fa-box-archive me-2"></i>Dataset</h4>
+      <p>
+        Dataset yang digunakan dalam penelitian ini adalah ulasan publik dari aplikasi <strong>Mobile JKN</strong> yang dikumpulkan dari platform Google Play Store. Data mencakup rentang waktu <strong>5 tahun (2020 - Maret 2025)</strong>,
+        dengan total lebih dari <strong>165.694 ulasan</strong> yang dianalisis.
+      </p>
+
+      <h4><i class="fas fa-code me-2"></i>Teknologi yang Digunakan</h4>
+      <div class="tech-logos text-center">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" alt="Python" title="Python" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/7/75/Django_logo.svg" alt="Django" title="Django" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/e/ed/Pandas_logo.svg" alt="Pandas" title="Pandas" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Scikit_learn_logo_small.svg" alt="Scikit-learn" title="Scikit-learn" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Unofficial_JavaScript_logo_2.svg" alt="JavaScript" title="JavaScript" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Bootstrap_logo.svg" alt="Bootstrap" title="Bootstrap" />
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

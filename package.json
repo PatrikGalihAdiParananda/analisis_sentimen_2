@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "app-store-scraper": "^0.18.0",
+    "chart.js": "^4.5.0",
+    "chartjs-chart-wordcloud": "^4.4.4",
+    "google-play-scraper": "^10.0.1",
+    "wordcloud": "^1.2.3"
+  }
+}

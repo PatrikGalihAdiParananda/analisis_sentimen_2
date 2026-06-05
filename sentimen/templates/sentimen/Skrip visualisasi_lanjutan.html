@@ -1,0 +1,106 @@
+{% extends 'sentimen/base.html' %} {% load static %} {% block title %}Visualisasi Lanjutan{% endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 fade-in-up">
+  <h1 class="h2 fw-bold mb-0">Visualisasi Lanjutan</h1>
+</div>
+
+{% if data_aman_untuk_visualisasi %}
+<div class="row">
+  <div class="col-12 mb-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title fw-bold">Tren Sentimen Temporal</h5>
+        <div style="height: 350px">
+          <canvas id="chartTrenSentimen"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-body text-center d-flex flex-column">
+        <h5 class="card-title fw-bold"><i class="fas fa-smile-beam text-success me-2"></i>Kata Kunci Positif</h5>
+        <div id="wordCloudPositif" class="flex-grow-1" style="min-height: 300px"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-body text-center d-flex flex-column">
+        <h5 class="card-title fw-bold"><i class="fas fa-angry text-danger me-2"></i>Kata Kunci Negatif</h5>
+        <div id="wordCloudNegatif" class="flex-grow-1" style="min-height: 300px"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-body text-center d-flex flex-column">
+        <h5 class="card-title fw-bold"><i class="fas fa-meh text-warning me-2"></i>Kata Kunci Netral</h5>
+        <div id="wordCloudNetral" class="flex-grow-1" style="min-height: 300px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-danger mt-4">
+  <h4 class="alert-heading">Data Visualisasi Tidak Ditemukan!</h4>
+  <p>Pastikan file <code>hasil_evaluasi.json</code> sudah ada dan server telah di-restart.</p>
+</div>
+{% endif %} {% endblock %} {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'sentimen/js/jquery.min.js' %}"></script>
+<script src="{% static 'sentimen/js/jquery.awesomeCloud-0.2.js' %}"></script>
+
+<script>
+  {% if data_aman_untuk_visualisasi %}
+      // Data untuk Grafik Tren
+      const trenLabels = {{ tren_labels|safe|default:'[]' }};
+      const trenPositif = {{ tren_positif|safe|default:'[]' }};
+      const trenNegatif = {{ tren_negatif|safe|default:'[]' }};
+      const trenNetral = {{ tren_netral|safe|default:'[]' }};
+
+      // Data untuk WordCloud
+      const wordCloudPositifData = {{ wordcloud_positif|safe|default:'[]' }};
+      const wordCloudNegatifData = {{ wordcloud_negatif|safe|default:'[]' }};
+      const wordCloudNetralData = {{ wordcloud_netral|safe|default:'[]' }};
+
+      document.addEventListener('DOMContentLoaded', function () {
+
+          // --- 1. Logika untuk Grafik Tren (Tetap Sama) ---
+          const ctxLine = document.getElementById('chartTrenSentimen');
+          if (ctxLine && trenLabels.length > 0) {
+              new Chart(ctxLine, { /* ... kode grafik tren Anda ... */ });
+          }
+
+          // --- 2. Logika BARU untuk WordCloud dengan jQuery.awesomeCloud ---
+          function createAwesomeWordCloud(elementId, wordData) {
+              if (wordData && wordData.length > 0) {
+                  // Konversi format data dari [{text:'a', value:10}] ke [['a', 10]]
+                  const listData = wordData.map(item => [item.text, item.value]);
+
+                  $("#" + elementId).awesomeCloud({
+                      "size" : {
+                          "grid" : 9,
+                          "factor" : 1
+                      },
+                      "options" : {
+                          "color" : "random-dark",
+                          "rotationRatio" : 0.35,
+                      },
+                      "words" : listData,
+                      "shape" : "circle"
+                  });
+              } else {
+                  $("#" + elementId).html('<p class="text-center text-secondary mt-5">Tidak ada data kata kunci.</p>');
+              }
+          }
+
+          createAwesomeWordCloud('wordCloudPositif', wordCloudPositifData);
+          createAwesomeWordCloud('wordCloudNegatif', wordCloudNegatifData);
+          createAwesomeWordCloud('wordCloudNetral', wordCloudNetralData);
+      });
+  {% endif %}
+</script>
+{% endblock %}

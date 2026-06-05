@@ -1,0 +1,228 @@
+{% extends 'sentimen/base.html' %} {% load static %} {% block title %}Dashboard Analisis Sentimen Mobile JKN{% endblock %} {% block extra_css %}
+<style>
+  .stat-card .stat-icon {
+    width: 60px;
+    height: 60px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--border-radius);
+  }
+  .dashboard-table thead th {
+    background-color: var(--surface-color);
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color) !important;
+  }
+  .dashboard-table tbody tr {
+    transition: background-color 0.2s;
+  }
+  .dashboard-table tbody tr:hover {
+    background-color: rgba(128, 128, 128, 0.1);
+  }
+  .chart-container-wrapper {
+    position: relative;
+    height: 350px; /* Sedikit penyesuaian tinggi */
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 fade-in-up">
+  <h1 class="h2 fw-bold mb-0">Dashboard Analisis</h1>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-2 col-lg-4 col-md-6">
+    <div class="card stat-card">
+      <div class="card-body d-flex align-items-center">
+        <div class="stat-icon bg-primary bg-opacity-10 me-3"><i class="fas fa-comments fa-2x text-primary"></i></div>
+        <div>
+          <h5 class="h2 fw-bolder mb-0">{{ total_ulasan|default:0 }}</h5>
+          <p class="text-secondary mb-0">Total Ulasan</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-2 col-lg-4 col-md-6">
+    <div class="card stat-card">
+      <div class="card-body d-flex align-items-center">
+        <div class="stat-icon bg-success bg-opacity-10 me-3"><i class="fas fa-smile-beam fa-2x text-success"></i></div>
+        <div>
+          <h5 class="h2 fw-bolder mb-0">{{ positif|default:0 }}</h5>
+          <p class="text-secondary mb-0">Positif</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-2 col-lg-4 col-md-6">
+    <div class="card stat-card">
+      <div class="card-body d-flex align-items-center">
+        <div class="stat-icon bg-danger bg-opacity-10 me-3"><i class="fas fa-angry fa-2x text-danger"></i></div>
+        <div>
+          <h5 class="h2 fw-bolder mb-0">{{ negatif|default:0 }}</h5>
+          <p class="text-secondary mb-0">Negatif</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-2 col-lg-4 col-md-6">
+    <div class="card stat-card">
+      <div class="card-body d-flex align-items-center">
+        <div class="stat-icon bg-warning bg-opacity-10 me-3"><i class="fas fa-meh fa-2x text-warning"></i></div>
+        <div>
+          <h5 class="h2 fw-bolder mb-0">{{ netral|default:0 }}</h5>
+          <p class="text-secondary mb-0">Netral</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-2 col-lg-4 col-md-6">
+    <div class="card stat-card">
+      <div class="card-body d-flex align-items-center">
+        <div class="stat-icon bg-info bg-opacity-10 me-3"><i class="fas fa-crosshairs fa-2x text-info"></i></div>
+        <div>
+          <h5 class="h2 fw-bolder mb-0">{{ akurasi|default:"0.0%" }}</h5>
+          <p class="text-secondary mb-0">Akurasi</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-2 col-lg-4 col-md-6">
+    <div class="card stat-card">
+      <div class="card-body d-flex align-items-center">
+        <div class="stat-icon" style="background-color: rgba(139, 92, 246, 0.1)"><i class="fas fa-bullseye fa-2x" style="color: #8b5cf6"></i></div>
+        <div>
+          <h5 class="h2 fw-bolder mb-0">{{ f1_score|default:"0.00%" }}</h5>
+          <p class="text-secondary mb-0">F1 Score</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mt-2">
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title fw-bold">Distribusi Sentimen</h5>
+        <div class="chart-container-wrapper flex-grow-1">
+          <canvas id="chartSentimen"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title fw-bold">Preview Ulasan Terbaru</h5>
+        <div class="table-responsive flex-grow-1">
+          <table class="table align-middle dashboard-table">
+            <thead>
+              <tr>
+                <th>Ulasan</th>
+                <th class="text-center">Label</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in data_preview %}
+              <tr>
+                <td>{{ row.content|truncatechars:80 }}</td>
+                <td class="text-center">
+                  {% comment %} PERBAIKAN: Menggunakan 'Label' (huruf besar L) sesuai dengan nama kolom di CSV {% endcomment %} {% if row.Label == 'Positif' %}
+                  <span class="badge bg-success bg-opacity-25 text-success rounded-pill">Positif</span>
+                  {% elif row.Label == 'Negatif' %}
+                  <span class="badge bg-danger bg-opacity-25 text-danger rounded-pill">Negatif</span>
+                  {% else %}
+                  <span class="badge bg-warning bg-opacity-25 text-warning rounded-pill">Netral</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="2" class="text-center text-secondary py-4">Data tidak ditemukan.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // === DATA CHART DARI DJANGO CONTEXT ===
+      // Menggunakan filter |default:0 untuk memastikan nilainya selalu angka
+      const positifData = {{ positif|default:0 }};
+      const negatifData = {{ negatif|default:0 }};
+      const netralData = {{ netral|default:0 }};
+      const totalData = positifData + negatifData + netralData;
+
+      // === INISIALISASI CHART.JS ===
+      const ctx = document.getElementById('chartSentimen');
+
+      // PERBAIKAN: Tambahkan pengecekan jika total data > 0 sebelum membuat chart
+      if (ctx && totalData > 0) {
+          const chartSentimen = new Chart(ctx, {
+              type: 'doughnut',
+              data: {
+                  labels: ['Positif', 'Negatif', 'Netral'],
+                  datasets: [{
+                      data: [positifData, negatifData, netralData],
+                      backgroundColor: [
+                          '#198754', // Warna hijau untuk Positif
+                          '#dc3545', // Warna merah untuk Negatif
+                          '#ffc107'  // Warna kuning untuk Netral
+                      ],
+                      borderColor: '#ffffff', // Memberi jarak antar slice
+                      borderWidth: 4,
+                      hoverOffset: 15,
+                  }]
+              },
+              options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  cutout: '70%',
+                  plugins: {
+                      legend: {
+                          position: 'bottom',
+                          labels: {
+                              font: { size: 14 },
+                              usePointStyle: true,
+                              padding: 20
+                          }
+                      },
+                      tooltip: {
+                          callbacks: {
+                              label: function(context) {
+                                  let label = context.label || '';
+                                  if (label) {
+                                      label += ': ';
+                                  }
+                                  if (context.raw !== null) {
+                                      const percentage = ((context.raw / totalData) * 100).toFixed(2);
+                                      label += `${context.raw} (${percentage}%)`;
+                                  }
+                                  return label;
+                              }
+                          }
+                      }
+                  }
+              }
+          });
+      } else if (ctx) {
+          // Jika tidak ada data, tampilkan pesan di canvas
+          const context = ctx.getContext('2d');
+          context.textAlign = 'center';
+          context.textBaseline = 'middle';
+          context.font = "16px 'Inter', sans-serif";
+          context.fillStyle = '#6c757d'; // Warna abu-abu
+          context.fillText('Data distribusi tidak tersedia.', ctx.width / 2, ctx.height / 2);
+      }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,13 @@
+# Mengabaikan folder lingkungan & modul
+env/
+node_modules/
+.ipynb_checkpoints/
+__pycache__/
+
+# Mengabaikan semua file model hasil training
+*.pkl
+*.joblib
+
+# Mengabaikan semua file dataset CSV dan Excel hasil preprocessing
+*.csv
+*.xlsx

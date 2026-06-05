@@ -1,0 +1,357 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Analisis Sentimen JKN{% endblock %}</title>
+
+    <!-- Frameworks & Libraries CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- ===== STYLE UTAMA ANDA ===== -->
+    <style>
+      :root {
+        /* ... (semua variabel CSS Anda tetap di sini) ... */
+        --bg-color: #f4f7fe;
+        --surface-color: #ffffff;
+        --border-color: #e2e8f0;
+        --text-primary: #0f172a;
+        --text-secondary: #64748b;
+        --accent-primary: #4f46e5;
+        --accent-hover: #4338ca;
+        --accent-danger: #e11d48;
+        --accent-success: #16a34a;
+        --sidebar-width: 260px;
+        --sidebar-width-close: 88px;
+        --topbar-height: 72px;
+        --border-radius: 12px;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --transition-cubic: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      /* ... (semua style CSS Anda yang lain tetap di sini) ... */
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        overflow-x: hidden;
+      }
+      .page-wrapper {
+        display: flex;
+      }
+      .side-bar {
+        width: var(--sidebar-width);
+        height: 100vh;
+        background-color: var(--surface-color);
+        border-right: 1px solid var(--border-color);
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        transition: width var(--transition-cubic);
+        z-index: 1000;
+      }
+      .main-content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        padding-left: var(--sidebar-width);
+        transition: padding-left var(--transition-cubic);
+      }
+      .side-bar.close {
+        width: var(--sidebar-width-close);
+      }
+      .main-content.full-width {
+        padding-left: var(--sidebar-width-close);
+      }
+      .side-bar.close .nav-text,
+      .side-bar.close .sidebar-title-text {
+        display: none;
+      }
+      .sidebar-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: var(--topbar-height);
+        padding: 0 1rem;
+        border-bottom: 1px solid var(--border-color);
+        white-space: nowrap;
+      }
+      .sidebar-logo {
+        color: var(--accent-primary);
+        font-size: 2rem;
+      }
+      .sidebar-title-text {
+        color: var(--text-primary);
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-left: 12px;
+        letter-spacing: 1px;
+      }
+      .navbar-links {
+        flex-grow: 1;
+        list-style: none;
+        padding: 0;
+        margin-top: 1rem;
+      }
+      .navbar-links li a {
+        display: flex;
+        align-items: center;
+        padding: 14px 0;
+        margin: 6px 16px;
+        border-radius: var(--border-radius);
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: color 0.2s, background-color 0.2s;
+        white-space: nowrap;
+        font-weight: 500;
+      }
+      .navbar-links li a:hover {
+        color: var(--accent-primary);
+        background-color: #eef2ff;
+      }
+      .navbar-links li.active a {
+        background: linear-gradient(90deg, var(--accent-primary), var(--accent-hover));
+        color: #fff;
+        font-weight: 600;
+        box-shadow: 0 4px 10px -2px rgba(79, 70, 229, 0.4);
+      }
+      .navbar-links .nav-icon {
+        min-width: 56px;
+        text-align: center;
+        font-size: 1.2rem;
+      }
+      .sidebar-footer {
+        padding: 20px 16px;
+        border-top: 1px solid var(--border-color);
+      }
+      .top-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        align-items: center;
+        height: var(--topbar-height);
+        padding: 0 2rem;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background-color: rgba(244, 247, 254, 0.7);
+        border-bottom: 1px solid var(--border-color);
+      }
+      .top-bar.scrolled {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      .top-bar-left {
+        justify-self: start;
+      }
+      .top-bar-center {
+        justify-self: center;
+      }
+      .top-bar-right {
+        justify-self: end;
+      }
+      .top-bar-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      .hamburger-btn {
+        width: 40px;
+        height: 40px;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        color: var(--text-secondary);
+        border-radius: 50%;
+        transition: color 0.2s, background-color 0.2s;
+      }
+      .hamburger-btn:hover {
+        background-color: var(--border-color);
+      }
+      main.content-area {
+        padding: 2rem;
+        flex-grow: 1;
+      }
+      .card {
+        background-color: var(--surface-color) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: var(--border-radius) !important;
+        box-shadow: var(--shadow-sm);
+      }
+      .card h1,
+      .card h2,
+      .card h3,
+      .card h4,
+      .card h5,
+      .card h6 {
+        color: var(--text-primary) !important;
+      }
+      .btn-accent {
+        background-color: var(--accent-primary);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: var(--border-radius);
+        transition: background-color 0.2s, transform 0.2s;
+      }
+      .btn-accent:hover {
+        background-color: var(--accent-hover);
+        color: #fff;
+        transform: scale(1.05);
+      }
+      .app-footer {
+        text-align: center;
+        padding: 1.5rem;
+        margin-top: auto;
+        border-top: 1px solid var(--border-color);
+        background-color: var(--surface-color);
+      }
+      .app-footer p {
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+      .app-footer .copyright-text {
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- ===== KODE SIDEBAR DIMASUKKAN DI SINI ===== -->
+      <aside class="side-bar">
+        <div class="sidebar-header">
+          <i class="fas fa-shield-heart sidebar-logo"></i>
+          <h4 class="sidebar-title-text">JKN-SENTI</h4>
+        </div>
+
+        <ul class="navbar-links">
+          <li class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <a href="{% url 'dashboard' %}">
+              <span class="nav-icon"><i class="fa-solid fa-house-chimney"></i></span>
+              <span class="nav-text">Dashboard</span>
+            </a>
+          </li>
+          <li class="{% if request.resolver_match.url_name == 'visualisasi_lanjutan' %}active{% endif %}">
+            <a href="{% url 'visualisasi_lanjutan' %}">
+              <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
+              <span class="nav-text">Visualisasi Tren</span>
+            </a>
+          </li>
+          <li class="{% if request.resolver_match.url_name == 'evaluasi_model' %}active{% endif %}">
+            <a href="{% url 'evaluasi_model' %}">
+              <span class="nav-icon"><i class="fa-solid fa-square-poll-vertical"></i></span>
+              <span class="nav-text">Evaluasi Model</span>
+            </a>
+          </li>
+          <li class="{% if request.resolver_match.url_name == 'analisis_realtime' %}active{% endif %}">
+            <a href="{% url 'analisis_realtime' %}">
+              <span class="nav-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></span>
+              <span class="nav-text">Analisis Teks</span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="sidebar-footer">
+          <ul class="navbar-links" style="margin-top: 0">
+            <li class="{% if request.resolver_match.url_name == 'tentang_proyek' %}active{% endif %}">
+              <a href="{% url 'tentang_proyek' %}">
+                <span class="nav-icon"><i class="fa-solid fa-circle-info"></i></span>
+                <span class="nav-text">Tentang Proyek</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+      <div class="main-content">
+        <header class="top-bar">
+          <div class="top-bar-left">
+            <div class="hamburger-btn"><i class="fas fa-bars fa-lg"></i></div>
+          </div>
+          <div class="top-bar-center">
+            <h4 class="top-bar-title">Analisis Ulasan Mobile JKN</h4>
+          </div>
+          <div class="top-bar-right">
+            <!-- Kosong -->
+          </div>
+        </header>
+
+        <main class="content-area">
+          {% if messages %}
+          <div class="container-fluid">
+            {% for message in messages %}
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %} {% block content %} {% endblock %}
+        </main>
+
+        <footer class="app-footer">
+          <p class="copyright-text">&copy; {% now "Y" %} Patrik Galih Adi Prananda. All Rights Reserved.</p>
+          <p>Proyek Skripsi - Universitas Katolik Musi Charitas</p>
+        </footer>
+      </div>
+    </div>
+
+    <!-- ===== JAVASCRIPT UTAMA & LIBRARY LAIN ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- PERBAIKAN: Memuat library grafik dari file lokal -->
+    <script src="{% static 'sentimen/js/chart.min.js' %}"></script>
+    <script src="{% static 'sentimen/js/chartjs-chart-wordcloud.min.js' %}"></script>
+
+    <script>
+      // Kode JavaScript untuk sidebar dan topbar
+      document.addEventListener("DOMContentLoaded", function () {
+        const hamburger = document.querySelector(".hamburger-btn");
+        const sidebar = document.querySelector(".side-bar");
+        const mainContent = document.querySelector(".main-content");
+        const topBar = document.querySelector(".top-bar");
+
+        const applySidebarState = () => {
+          const isClosed = localStorage.getItem("sidebar_closed") === "true";
+          sidebar.classList.toggle("close", isClosed);
+          mainContent.classList.toggle("full-width", isClosed);
+        };
+        applySidebarState();
+        hamburger.addEventListener("click", () => {
+          const isClosed = sidebar.classList.toggle("close");
+          mainContent.classList.toggle("full-width", isClosed);
+          localStorage.setItem("sidebar_closed", isClosed);
+        });
+
+        const contentArea = document.querySelector(".main-content");
+        if (contentArea) {
+          contentArea.addEventListener("scroll", () => {
+            if (contentArea.scrollTop > 10) {
+              topBar.classList.add("scrolled");
+            } else {
+              topBar.classList.remove("scrolled");
+            }
+          });
+        }
+      });
+    </script>
+
+    <!-- Blok ini adalah tempat di mana JavaScript spesifik halaman (seperti kode grafik) akan disisipkan -->
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

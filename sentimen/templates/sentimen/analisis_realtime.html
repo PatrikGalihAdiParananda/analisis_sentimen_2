@@ -1,0 +1,271 @@
+{% extends 'sentimen/base.html' %} {% load static %} {% block title %}Analisis Sentimen Real-time{% endblock %} {% block extra_css %}
+<style>
+  /* --- Gaya untuk Kartu Hasil --- */
+  .result-section {
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  /* 1. Kartu Hasil Utama */
+  #hasil-emoji {
+    font-size: 4rem;
+    line-height: 1;
+  }
+  #hasil-label {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .confidence-wrapper {
+    max-width: 400px;
+    margin: 1rem auto 0 auto;
+  }
+  .progress {
+    height: 25px;
+    font-size: 1rem;
+    border-radius: var(--border-radius);
+  }
+  .progress-bar.bg-positive {
+    background-color: #16a34a !important;
+  }
+  .progress-bar.bg-negative {
+    background-color: #dc2626 !important;
+  }
+  .progress-bar.bg-neutral {
+    background-color: #64748b !important;
+  }
+
+  /* 2. Kartu Sorotan Kata Kunci */
+  #highlighted-text-card {
+    padding: 1.5rem;
+    background-color: #f8fafc;
+    border-radius: var(--border-radius);
+  }
+  .highlight-positive {
+    background-color: #dcfce7;
+    color: #15803d;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .highlight-negative {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .highlight-neutral {
+    background-color: #e2e8f0;
+    color: #334155;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  /* 3. Kartu Langkah Pra-Pemrosesan */
+  .step-box {
+    background-color: #f8fafc;
+    padding: 1rem;
+    border-left: 4px solid var(--accent-primary);
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    margin-bottom: 1rem;
+    word-wrap: break-word;
+  }
+  .step-box strong {
+    color: var(--accent-primary);
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="text-center">
+        <h1 class="h2 fw-bold">Analisis Sentimen "X-Ray"</h1>
+        <p class="text-muted">Masukkan ulasan untuk melihat hasil sentimen dan "cara berpikir" model secara transparan.</p>
+      </div>
+
+      <div class="card mt-4">
+        <div class="card-body">
+          <form id="sentiment-form">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="text-input" class="form-label fw-bold">Teks Ulasan:</label>
+              <textarea class="form-control" id="text-input" name="teks_ulasan" rows="4" placeholder="Contoh: Aplikasinya sangat membantu, tapi terkadang masih suka error." required></textarea>
+            </div>
+            <div class="d-grid">
+              <button type="submit" id="submit-button" class="btn btn-primary btn-lg">
+                <span id="button-text">Analisis Sekarang</span>
+                <span id="button-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div id="result-container" style="display: none">
+        <div class="result-section text-center">
+          <div id="hasil-emoji">🤔</div>
+          <div id="hasil-label" class="mt-3">Menunggu Hasil...</div>
+          <div class="confidence-wrapper">
+            <p class="text-muted mb-2">Tingkat Keyakinan Model</p>
+            <div class="progress" role="progressbar">
+              <div id="hasil-confidence-bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"><span id="hasil-confidence-text">0%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-section">
+          <h5 class="fw-bold mb-3">🔍 Sorotan Kata Kunci</h5>
+          <div id="highlighted-text-card">
+            <p id="highlighted-text-content" class="lead"></p>
+          </div>
+        </div>
+
+        <div class="result-section" id="similar-section" style="display: none">
+          <h5 class="fw-bold mb-3">📚 Ulasan Serupa dari Database</h5>
+          <p class="text-muted small">Sistem menemukan ulasan berikut yang memiliki kemiripan pola kata dengan input Anda:</p>
+          <div class="list-group" id="similar-list"></div>
+        </div>
+
+        <div class="result-section">
+          <h5 class="fw-bold mb-3">⚙️ "Di Balik Layar": Pra-Pemrosesan Teks</h5>
+          <div id="preprocessing-steps-container">
+            <div class="step-box">
+              <strong>Normalisasi &amp; Cleaning:</strong>
+              <p id="step-normalisasi" class="mb-0 text-muted"></p>
+            </div>
+            <div class="step-box">
+              <strong>Stopword Removal:</strong>
+              <p id="step-stopwords" class="mb-0 text-muted"></p>
+            </div>
+            <div class="step-box">
+              <strong>Stemming (Teks Final):</strong>
+              <p id="step-stemming" class="mb-0 text-muted"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="error-message" class="alert alert-danger mt-3" style="display: none" role="alert"></div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("sentiment-form");
+    const submitButton = document.getElementById("submit-button");
+    const buttonText = document.getElementById("button-text");
+    const buttonSpinner = document.getElementById("button-spinner");
+    const resultContainer = document.getElementById("result-container");
+    const errorMessage = document.getElementById("error-message");
+
+    // Elemen Hasil
+    const hasilEmoji = document.getElementById("hasil-emoji");
+    const hasilLabel = document.getElementById("hasil-label");
+    const confidenceBar = document.getElementById("hasil-confidence-bar");
+    const confidenceText = document.getElementById("hasil-confidence-text");
+    const highlightedTextContent = document.getElementById("highlighted-text-content");
+
+    // Elemen Preprocessing
+    const stepNormalisasi = document.getElementById("step-normalisasi");
+    const stepStopwords = document.getElementById("step-stopwords");
+    const stepStemming = document.getElementById("step-stemming");
+
+    // Elemen Ulasan Mirip (BARU)
+    const similarSection = document.getElementById("similar-section");
+    const similarList = document.getElementById("similar-list");
+
+    const sentimentProperties = {
+      Positif: { emoji: "😊", labelClass: "text-success", barClass: "bg-positive", highlightClass: "highlight-positive" },
+      Negatif: { emoji: "😠", labelClass: "text-danger", barClass: "bg-negative", highlightClass: "highlight-negative" },
+      Netral: { emoji: "😐", labelClass: "text-warning", barClass: "bg-neutral", highlightClass: "highlight-neutral" },
+    };
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      buttonText.textContent = "Menganalisis...";
+      buttonSpinner.style.display = "inline-block";
+      submitButton.disabled = true;
+      resultContainer.style.display = "none";
+      errorMessage.style.display = "none";
+
+      // Reset Ulasan Mirip
+      similarSection.style.display = "none";
+      similarList.innerHTML = "";
+
+      const formData = new FormData(form);
+
+      fetch("{% url 'klasifikasi_sentimen' %}", {
+        method: "POST",
+        body: formData,
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+      })
+        .then((response) => (response.ok ? response.json() : response.json().then((err) => Promise.reject(err))))
+        .then((data) => {
+          if (data.error) throw new Error(data.error);
+
+          const props = sentimentProperties[data.sentiment] || sentimentProperties["Netral"];
+
+          // --- Update Kartu 1: Hasil Utama ---
+          hasilEmoji.textContent = props.emoji;
+          hasilLabel.className = `mt-3 ${props.labelClass}`;
+          hasilLabel.textContent = data.sentiment;
+          const confidenceValue = parseFloat(data.confidence) || 0;
+          confidenceBar.style.width = data.confidence;
+          confidenceBar.className = `progress-bar progress-bar-striped progress-bar-animated ${props.barClass}`;
+          confidenceBar.setAttribute("aria-valuenow", confidenceValue);
+          confidenceText.textContent = data.confidence;
+
+          // --- Update Kartu 2: Sorotan Kata Kunci ---
+          let highlightedText = data.original_text;
+          if (data.trigger_words && data.trigger_words.length > 0) {
+            const regex = new RegExp(`\\b(${data.trigger_words.join("|")})\\b`, "gi");
+            highlightedText = highlightedText.replace(regex, `<span class="${props.highlightClass}">$&</span>`);
+          }
+          highlightedTextContent.innerHTML = highlightedText;
+
+          // --- Update Kartu 4: Ulasan Mirip (BARU) ---
+          if (data.similar_reviews && data.similar_reviews.length > 0) {
+            data.similar_reviews.forEach((item) => {
+              const li = document.createElement("div");
+              li.className = "list-group-item list-group-item-action flex-column align-items-start";
+              li.innerHTML = `
+                    <div class="d-flex w-100 justify-content-between">
+                        <small class="text-muted">Kemiripan</small>
+                        <span class="badge bg-primary rounded-pill">${item.similarity}</span>
+                    </div>
+                    <p class="mb-1 mt-1 text-dark">"${item.text}"</p>
+                `;
+              similarList.appendChild(li);
+            });
+            similarSection.style.display = "block";
+          }
+
+          // --- Update Kartu 3: Langkah Pra-Pemrosesan ---
+          stepNormalisasi.textContent = data.processed_steps.normalisasi || "(tidak ada perubahan)";
+          stepStopwords.textContent = data.processed_steps.stopwords || "(tidak ada kata yang dihapus)";
+          stepStemming.textContent = data.processed_steps.stemming || "(tidak ada hasil stemming)";
+
+          resultContainer.style.display = "block";
+        })
+        .catch((error) => {
+          const friendlyMessage = error.error || error.message || "Terjadi kesalahan tidak terduga.";
+          errorMessage.textContent = friendlyMessage;
+          errorMessage.style.display = "block";
+          console.error("Fetch Error:", error);
+        })
+        .finally(() => {
+          buttonText.textContent = "Analisis Sekarang";
+          buttonSpinner.style.display = "none";
+          submitButton.disabled = false;
+        });
+    });
+  });
+</script>
+{% endblock %}
