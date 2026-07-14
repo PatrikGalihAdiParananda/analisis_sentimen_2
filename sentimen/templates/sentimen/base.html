@@ -1,24 +1,20 @@
 {% load static %}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Analisis Sentimen JKN{% endblock %}</title>
-
-    <!-- Frameworks & Libraries CSS -->
+    <link rel="icon" href="{% static 'favicon.ico' %}" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-    <!-- ===== STYLE UTAMA ANDA ===== -->
     <style>
       :root {
-        /* ... (semua variabel CSS Anda tetap di sini) ... */
         --bg-color: #f4f7fe;
         --surface-color: #ffffff;
         --border-color: #e2e8f0;
@@ -36,7 +32,6 @@
         --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         --transition-cubic: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
-      /* ... (semua style CSS Anda yang lain tetap di sini) ... */
       body {
         font-family: "Inter", sans-serif;
         background-color: var(--bg-color);
@@ -111,7 +106,9 @@
         border-radius: var(--border-radius);
         color: var(--text-secondary);
         text-decoration: none;
-        transition: color 0.2s, background-color 0.2s;
+        transition:
+          color 0.2s,
+          background-color 0.2s;
         white-space: nowrap;
         font-weight: 500;
       }
@@ -173,7 +170,9 @@
         cursor: pointer;
         color: var(--text-secondary);
         border-radius: 50%;
-        transition: color 0.2s, background-color 0.2s;
+        transition:
+          color 0.2s,
+          background-color 0.2s;
       }
       .hamburger-btn:hover {
         background-color: var(--border-color);
@@ -203,7 +202,9 @@
         font-weight: 600;
         padding: 10px 20px;
         border-radius: var(--border-radius);
-        transition: background-color 0.2s, transform 0.2s;
+        transition:
+          background-color 0.2s,
+          transform 0.2s;
       }
       .btn-accent:hover {
         background-color: var(--accent-hover);
@@ -226,13 +227,49 @@
         color: var(--text-primary);
         font-weight: 500;
       }
+
+      /* === TAMBAHAN UNTUK TAMPILAN HP (MOBILE RESPONSIVE) === */
+      @media screen and (max-width: 768px) {
+        .side-bar {
+          transform: translateX(-100%);
+          position: fixed;
+        }
+        .side-bar.mobile-active {
+          transform: translateX(0);
+          width: var(--sidebar-width);
+        }
+        .main-content,
+        .main-content.full-width {
+          padding-left: 0;
+          width: 100vw;
+        }
+        .top-bar {
+          padding: 0 1rem;
+          grid-template-columns: auto 1fr;
+        }
+        .top-bar-center {
+          justify-self: start;
+          margin-left: 10px;
+        }
+        .top-bar-right {
+          display: none;
+        }
+        .top-bar-title {
+          font-size: 1rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        main.content-area {
+          padding: 1rem;
+        }
+      }
     </style>
 
     {% block extra_css %}{% endblock %}
   </head>
   <body>
     <div class="page-wrapper">
-      <!-- ===== KODE SIDEBAR DIMASUKKAN DI SINI ===== -->
       <aside class="side-bar">
         <div class="sidebar-header">
           <i class="fas fa-shield-heart sidebar-logo"></i>
@@ -286,9 +323,7 @@
           <div class="top-bar-center">
             <h4 class="top-bar-title">Analisis Ulasan Mobile JKN</h4>
           </div>
-          <div class="top-bar-right">
-            <!-- Kosong -->
-          </div>
+          <div class="top-bar-right"></div>
         </header>
 
         <main class="content-area">
@@ -311,31 +346,58 @@
       </div>
     </div>
 
-    <!-- ===== JAVASCRIPT UTAMA & LIBRARY LAIN ===== -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- PERBAIKAN: Memuat library grafik dari file lokal -->
-    <script src="{% static 'sentimen/js/chart.min.js' %}"></script>
-    <script src="{% static 'sentimen/js/chartjs-chart-wordcloud.min.js' %}"></script>
-
     <script>
-      // Kode JavaScript untuk sidebar dan topbar
       document.addEventListener("DOMContentLoaded", function () {
         const hamburger = document.querySelector(".hamburger-btn");
         const sidebar = document.querySelector(".side-bar");
         const mainContent = document.querySelector(".main-content");
         const topBar = document.querySelector(".top-bar");
 
+        // Deteksi apakah sedang pakai layar HP (di bawah 768px)
+        const isMobile = window.innerWidth <= 768;
+
         const applySidebarState = () => {
-          const isClosed = localStorage.getItem("sidebar_closed") === "true";
-          sidebar.classList.toggle("close", isClosed);
-          mainContent.classList.toggle("full-width", isClosed);
+          if (!isMobile) {
+            // Perilaku Laptop: Gunakan mode close (mengecil)
+            const isClosed = localStorage.getItem("sidebar_closed") === "true";
+            sidebar.classList.toggle("close", isClosed);
+            mainContent.classList.toggle("full-width", isClosed);
+          } else {
+            // Perilaku HP: Pastikan sidebar hilang saat pertama kali dimuat
+            sidebar.classList.remove("mobile-active");
+          }
         };
+
         applySidebarState();
-        hamburger.addEventListener("click", () => {
-          const isClosed = sidebar.classList.toggle("close");
-          mainContent.classList.toggle("full-width", isClosed);
-          localStorage.setItem("sidebar_closed", isClosed);
+
+        // TAMBAHKAN parameter "e" (event) di sini
+        hamburger.addEventListener("click", (e) => {
+          // INI KUNCINYA: Mencegah efek klik bocor dan menutup menu secara instan
+          e.stopPropagation();
+
+          // Cek ulang ukuran layar saat tombol diklik
+          if (window.innerWidth <= 768) {
+            // Perilaku HP: Sidebar masuk/keluar dari kiri layar
+            sidebar.classList.toggle("mobile-active");
+          } else {
+            // Perilaku Laptop: Sidebar membesar/mengecil (mode ikon)
+            const isClosed = sidebar.classList.toggle("close");
+            mainContent.classList.toggle("full-width", isClosed);
+            localStorage.setItem("sidebar_closed", isClosed);
+          }
+        });
+
+        // PERBAIKAN FITUR TUTUP OTOMATIS HP
+        // Kita pindahkan pendeteksi klik ke seluruh dokumen agar lebih akurat
+        document.addEventListener("click", (e) => {
+          if (window.innerWidth <= 768 && sidebar.classList.contains("mobile-active")) {
+            // Hanya tutup jika yang diklik BUKAN area sidebar itu sendiri
+            if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
+              sidebar.classList.remove("mobile-active");
+            }
+          }
         });
 
         const contentArea = document.querySelector(".main-content");
@@ -351,7 +413,6 @@
       });
     </script>
 
-    <!-- Blok ini adalah tempat di mana JavaScript spesifik halaman (seperti kode grafik) akan disisipkan -->
     {% block extra_js %}{% endblock %}
   </body>
 </html>

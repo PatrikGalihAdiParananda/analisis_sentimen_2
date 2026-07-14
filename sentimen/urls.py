@@ -1,4 +1,5 @@
 from django.urls import path
+from django.http import JsonResponse  # <-- Tambahkan import ini
 from . import views
 
 urlpatterns = [
@@ -20,4 +21,7 @@ urlpatterns = [
     
     # Placeholder untuk training (Mencegah error jika tombol diklik)
     path('train-model/', views.train_model, name='train_model'),
+
+    # Membungkam peringatan 404 dari Google Chrome DevTools
+    path('.well-known/appspecific/com.chrome.devtools.json', lambda r: JsonResponse({})),  # <-- Tambahkan baris ini
 ]

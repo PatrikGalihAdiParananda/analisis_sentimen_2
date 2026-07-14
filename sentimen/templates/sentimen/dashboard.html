@@ -129,9 +129,9 @@
               <tr>
                 <td>{{ row.content|truncatechars:80 }}</td>
                 <td class="text-center">
-                  {% comment %} PERBAIKAN: Menggunakan 'Label' (huruf besar L) sesuai dengan nama kolom di CSV {% endcomment %} {% if row.Label == 'Positif' %}
+                  {% if row.sentiment_label|title == 'Positif' %}
                   <span class="badge bg-success bg-opacity-25 text-success rounded-pill">Positif</span>
-                  {% elif row.Label == 'Negatif' %}
+                  {% elif row.sentiment_label|title == 'Negatif' %}
                   <span class="badge bg-danger bg-opacity-25 text-danger rounded-pill">Negatif</span>
                   {% else %}
                   <span class="badge bg-warning bg-opacity-25 text-warning rounded-pill">Netral</span>

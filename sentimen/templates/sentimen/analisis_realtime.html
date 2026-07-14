@@ -95,7 +95,7 @@
             {% csrf_token %}
             <div class="mb-3">
               <label for="text-input" class="form-label fw-bold">Teks Ulasan:</label>
-              <textarea class="form-control" id="text-input" name="teks_ulasan" rows="4" placeholder="Contoh: Aplikasinya sangat membantu, tapi terkadang masih suka error." required></textarea>
+              <textarea class="form-control" id="text-input" name="teks_ulasan" rows="4" placeholder="Contoh: Aplikasinya sangat membantu, tapi terkadang masih suka error."></textarea>
             </div>
             <div class="d-grid">
               <button type="submit" id="submit-button" class="btn btn-primary btn-lg">
@@ -256,8 +256,14 @@
         })
         .catch((error) => {
           const friendlyMessage = error.error || error.message || "Terjadi kesalahan tidak terduga.";
+
+          // Memunculkan kotak error merah di bawah form
           errorMessage.textContent = friendlyMessage;
           errorMessage.style.display = "block";
+
+          // 🟢 ALERT POPUP DITAMBAHKAN DI SINI
+          alert(friendlyMessage);
+
           console.error("Fetch Error:", error);
         })
         .finally(() => {
